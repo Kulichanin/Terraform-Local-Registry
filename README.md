@@ -11,10 +11,12 @@ mkdir nexus-data && sudo chown -R 200 nexus-data
 Nexus написан на Java. [Требования](https://help.sonatype.com/en/sonatype-nexus-repository-system-requirements.html) к ресурсам. Минимальное значение [ОЗУ](https://help.sonatype.com/en/nexus-repository-memory-overview.html) Основные параметры конфигурации:
 
 ```bash
--Xms1g: Устанавливает начальный размер ОЗУ при запуске приложения.
--Xmx1g: Устанавливает максимальный предел ОЗУ, который JVM может занять у операционной системы.
--XX:MaxDirectMemorySize=1g: Максимальный размер использования ОЗУ.
+-Xms1500m: Устанавливает начальный размер ОЗУ при запуске приложения.
+-Xmx1500m: Устанавливает максимальный предел ОЗУ, который JVM может занять у операционной системы.
+-XX:MaxDirectMemorySize=1500m: Максимальный размер использования ОЗУ.
 ```
+
+На данный момент версия образа sonatype/nexus3:3.90.0 нестабильна и падает с ошибкой.
 
 ## Запуск окружения для стенда
 
@@ -26,4 +28,10 @@ docker compose up -d --force-recreate
 
 ```bash
 docker compose down -v
+```
+
+Получить пароль
+
+```bash
+docker exec nexus cat /nexus-data/admin.password
 ```
