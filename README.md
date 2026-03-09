@@ -30,8 +30,60 @@ docker compose up -d --force-recreate
 docker compose down -v
 ```
 
-Получить пароль
+Получить пароль от пользователя admin
 
 ```bash
 docker exec nexus cat /nexus-data/admin.password
+```
+
+## Локальное размещение провайдера
+
+### Предварительная сборка и размещение провайдера
+
+Скачиваем провайдер. Если нужно собираем провайдер из исходников через команду `go build`
+
+```bash
+wget https://github.com/hashicorp/terraform-provider-local/archive/refs/tags/v2.7.0.zip
+unzip v2.7.0.zip
+cd terraform-provider-local-2.7.0
+
+```
+
+Создание структуры папок (Plugins Directory)
+
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.7.0/linux_amd64/
+```
+
+Terraform очень внимательно следит за каталогами. Он ищет провайдеров в строго определенных путях. Нам нужно имитировать структуру официального реестра. Структура: <ПУТЬ>/registry.terraform.io/hashicorp/local/<ВЕРСИЯ>/<ОС_АРХИТЕКТУРА>/
+
+Теперь перемести туда собранный файл
+
+```bash
+cp terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.7.0/linux_amd64/
+```
+
+### Конфигурация terraform
+
+Создайте (или отредактируйте) файл .terraformrc в домашнем каталоге (`~/.terraformrc` для Linux/Mac или `%APPDATA%\terraform.rc` для Windows)
+
+```rc
+provider_installation {
+  # Это заставляет Terraform искать провайдеров сначала в локальной папке
+  filesystem_mirror {
+    path    = "/home/mda/.terraform.d/plugins" # Замени 'mda' на своего юзера
+    include = ["hashicorp/local"]
+  }
+
+  # Прямой доступ к официальному реестру для всего остального (если нужно)
+  direct {
+    exclude = ["hashicorp/local"]
+  }
+}
+```
+
+Теперь можем вернуться к своему манифесту с local_file и запусти инициализацию
+
+```bash
+terraform init
 ```

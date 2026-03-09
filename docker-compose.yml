@@ -4,7 +4,8 @@ services:
     container_name: nexus
     ports:
       - "8081:8081"
-    volumes:
-      - nexus-data:/nexus-data
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms1500m -Xmx1500m -XX:MaxDirectMemorySize=1500m
+
+volumes:
+  nexus-data:

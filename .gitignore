@@ -38,3 +38,11 @@ terraform.rc
 
 # Ignore nexus data
 /nexus-data
+
+# Ignore local provider data
+terraform-provider-local-*
+*.zip
+
+# Ignore project data
+*.txt
+*.lock.hcl
