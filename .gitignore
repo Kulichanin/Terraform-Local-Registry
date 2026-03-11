@@ -37,7 +37,10 @@ override.tf.json
 terraform.rc
 
 # Ignore nexus data
-/nexus-data
+/infra/nexus-data
+
+# Ignore caddy data
+/infra/caddy-data
 
 # Ignore local provider data
 terraform-provider-local-*

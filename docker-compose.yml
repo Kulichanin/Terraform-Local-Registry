@@ -7,5 +7,16 @@ services:
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms1500m -Xmx1500m -XX:MaxDirectMemorySize=1500m
 
+  proxy:
+    image: caddy:latest
+    container_name: caddy-proxy
+    ports:
+      - "443:443"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile
+      - ./infra/caddy-data:/data
+    depends_on:
+      - nexus
+
 volumes:
   nexus-data:
