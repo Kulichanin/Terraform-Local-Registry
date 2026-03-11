@@ -105,29 +105,45 @@ terraform init
 ## Настройка Terraform для работы в Nexus
 
 ### Создание репозитория в Nexus
+
 Предварительно подготовим GPG ключ для подписи нашего репозитория.
 
 Создание нового ключа.
 
+```bash
 gpg --full-generate-key
+```
+
 Найти свой новый ключ.
 
+```bash
 gpg --list-secret-keys --keyid-format=LONG
+```
+
 Экспортируем его закрытую часть.
 
+```bash
 gpg --export-secret-key --armor YOUR_KEY_ID
-Добавление провайдера в Nexus
-Перед тем как добавить провайдер его нужно положить в архив. Имя архива должно соответствовать стандарту {name}_{version}_{os}_{arch}.zip.
+```
 
+Добавление провайдера в Nexus
+Перед тем как добавить провайдер его нужно положить в архив. Имя архива должно соответствовать стандарту `{name}_{version}_{os}_{arch}.zip`.
+
+```bash
 zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local 
+```
+
 Загрузка самого архива
 
+```bash
 curl -u admin:твой_пароль \
      -X POST "http://localhost:8081/repository/terraform-hosted/providers/hashicorp/local/2.7.0/linux_amd64/terraform-provider-local_2.7.0_linux_amd64.zip" \
      --upload-file terraform-provider-local_2.7.0_linux_amd64.zip
-Настройка репозитория
-Исправим ~/.terraformrc
+```
 
+Настройка репозитория. Исправим ~/.terraformrc
+
+```conf
 provider_installation {
   network_mirror {
     url = "http://localhost:8081/repository/terraform-hosted"
@@ -137,3 +153,4 @@ provider_installation {
     exclude = ["registry.terraform.io/*/*"]
   }
 }
+```
