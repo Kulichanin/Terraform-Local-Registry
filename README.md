@@ -166,10 +166,10 @@ zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local LICE
 
 ```bash
 curl -X PUT \
-	'https://localhost/repository/terraform-hosted/v1/providers/hashicorp/local/2.7.0/download/linux/amd64' \
-	-u 'user:pass' \
-	-H 'Content-Type: application/zip' \
-	--data-binary '@terraform-provider-local_2.7.0_linux_amd64.zip'
+  'https://localhost/repository/terraform-hosted/v1/providers/hashicorp/local/2.7.0/download/linux/amd64' \
+  -u 'user:pass' \
+  -H 'Content-Type: application/zip' \
+  --data-binary '@terraform-provider-local_2.7.0_linux_amd64.zip'
 ```
 
 Настройка репозитория. Исправим ~/.terraformrc
