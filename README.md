@@ -96,7 +96,7 @@ There are some problems with the provider_installation configuration:
 ╷
 │ Error: Invalid URL for provider installation source
 │
-│ Cannot use "http://localhost:8081/repository/terraform-hosted" as a URL for
+│ Cannot use "http://localhost/repository/terraform-hosted" as a URL for
 │ a network provider mirror: the mirror must be at an https: URL.
 ╵
 ```
@@ -159,7 +159,7 @@ gpg --export-secret-key --armor YOUR_KEY_ID
 Перед тем как добавить провайдер его нужно положить в архив. Имя архива должно соответствовать стандарту `{name}_{version}_{os}_{arch}.zip`.
 
 ```bash
-zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local 
+zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local LICENSE
 ```
 
 Загрузка архива с помощью curl !TODO
@@ -167,9 +167,9 @@ zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local
 ```bash
 curl -X PUT \
 	'https://localhost/repository/terraform-hosted/v1/providers/hashicorp/local/2.7.0/download/linux/amd64' \
-	-u 'admin:nexus' \
+	-u 'user:pass' \
 	-H 'Content-Type: application/zip' \
-	--data-binary '@{terraform-provider-local_2.7.0_linux_amd64}.zip'
+	--data-binary '@terraform-provider-local_2.7.0_linux_amd64.zip'
 ```
 
 Настройка репозитория. Исправим ~/.terraformrc
@@ -177,7 +177,7 @@ curl -X PUT \
 ```conf
 host "registry.terraform.io" {
   services = {
-    "providers.v1" = "https://localhost/repository/terraform-hosted/v1/providers/<USER_TOKEN>/"
+    "providers.v1" = "https://localhost/repository/terraform-hosted/v1/providers/"
   }
 }
 ```
