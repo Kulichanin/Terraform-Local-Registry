@@ -6,6 +6,8 @@ services:
       - "8081:8081"
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms1500m -Xmx1500m -XX:MaxDirectMemorySize=1500m
+    volumes:
+      - nexus-data:/nexus-data
 
   proxy:
     image: caddy:latest
