@@ -34,7 +34,7 @@ cp terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashico
 provider_installation {
   # Это заставляет Terraform искать провайдеров сначала в локальной папке
   filesystem_mirror {
-    path    = "/home/mda/.terraform.d/plugins" # Замени 'mda' на своего юзера
+    path    = "~/.terraform.d/plugins" 
     include = ["hashicorp/local"]
   }
 
