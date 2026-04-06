@@ -4,41 +4,46 @@
 
 ### Предварительная сборка и размещение провайдера
 
-Скачиваем провайдер. Если нужно собираем провайдер из исходников через команду `go build`
+Скачиваем провайдер.
 
 ```bash
-wget https://github.com/hashicorp/terraform-provider-local/archive/refs/tags/v2.7.0.zip
-unzip v2.7.0.zip
-cd terraform-provider-local-2.7.0
+wget https://github.com/hashicorp/terraform-provider-local/archive/refs/tags/v2.8.0.zip
+unzip v2.8.0.zip && cd terraform-provider-local-2.8.0
 ```
 
 Создание структуры папок (Plugins Directory)
 
 ```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.7.0/linux_amd64/
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/
 ```
 
-Terraform очень внимательно следит за каталогами. Он ищет провайдеров в строго определенных путях. Нам нужно имитировать структуру официального реестра. Структура: <ПУТЬ>/registry.terraform.io/hashicorp/local/<ВЕРСИЯ>/<ОС_АРХИТЕКТУРА>/
-
-Теперь перемести туда собранный файл
+Собираем их исходников провайдер.
 
 ```bash
-cp terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.7.0/linux_amd64/
+GOOS=linux GOARCH=amd64 go build -v
+```
+
+Terraform очень внимательно следит за каталогами. Он ищет провайдеров в строго определенных путях. Нам нужно имитировать структуру официального реестра. Для работы через `filesystem_mirror` структура внутри path должна выглядеть так: **{path}/{hostname}/{namespace}/{type}/{version}/{os}_{arch}/...**. В нашем случае структура: **<ПУТЬ>/registry.terraform.io/hashicorp/local/<ВЕРСИЯ>/<ОС_АРХИТЕКТУРА>/**
+
+Теперь переместим туда собранный файл с помощью `install`(install -D копирует файл и создаёт необходимые каталоги).
+
+```bash
+install -D terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/terraform-provider-local
 ```
 
 ### Конфигурация terraform
 
-Создайте (или отредактируйте) файл .terraformrc в домашнем каталоге (`~/.terraformrc` для Linux/Mac или `%APPDATA%\terraform.rc` для Windows). [Подробнее про CLI конфигурацию](https://developer.hashicorp.com/terraform/cli/config/config-file).
+Создайте (или отредактируйте) файл `.terraformrc` в домашнем каталоге (`~/.terraformrc` для Linux/Mac или `%APPDATA%\terraform.rc` для Windows). [Подробнее про CLI конфигурацию](https://developer.hashicorp.com/terraform/cli/config/config-file).
 
 ```rc
 provider_installation {
-  # Это заставляет Terraform искать провайдеров сначала в локальной папке
+  # Terraform будет сначала искать провайдер в локальной папке.
   filesystem_mirror {
-    path    = "~/.terraform.d/plugins" 
+    path    = "/home/mda/.terraform.d/plugins" 
     include = ["hashicorp/local"]
   }
 
-  # Прямой доступ к официальному реестру для всего остального (если нужно)
+  # Прямой доступ к официальному реестру для всего остального (если не найдет нужное)
   direct {
     exclude = ["hashicorp/local"]
   }
@@ -48,7 +53,7 @@ provider_installation {
 Теперь можем вернуться к своему манифесту с local_file и запусти инициализацию
 
 ```bash
-terraform init
+TF_LOG=DEBUG terraform init
 ```
 
 ## Nexus
@@ -67,7 +72,7 @@ Nexus написан на Java. [Требования](https://help.sonatype.com
 -XX:MaxDirectMemorySize=1500m: Максимальный размер использования ОЗУ.
 ```
 
-На данный момент версия образа sonatype/nexus3:3.90.0 нестабильна и падает с ошибкой.
+На данный момент версия образа `sonatype/nexus3:3.90.0` нестабильна и падает с ошибкой.
 
 ## Запуск окружения для стенда
 
