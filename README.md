@@ -58,12 +58,6 @@ TF_LOG=DEBUG terraform init
 
 ## Nexus
 
-Nexus пишет данные в папку `/nexus-data` внутри контейнера. Чтобы данные не пропали после перезагрузки, их нужно вынести на хост-машину. Для этого необходимо подготовить каталог для хранения данных. Nexus внутри контейнера работает под пользователем с UID 200.
-
-```bash
-mkdir nexus-data && sudo chown -R 200 nexus-data
-```
-
 Nexus написан на Java. [Требования](https://help.sonatype.com/en/sonatype-nexus-repository-system-requirements.html) к ресурсам. Минимальное значение [ОЗУ](https://help.sonatype.com/en/nexus-repository-memory-overview.html) Основные параметры конфигурации:
 
 ```bash
@@ -77,13 +71,13 @@ Nexus написан на Java. [Требования](https://help.sonatype.com
 ## Запуск окружения для стенда
 
 ```bash
-docker compose up -d --force-recreate
+docker compose up -d
 ```
 
 Остановить окружения и удалить volume
 
 ```bash
-docker compose down -v
+docker compose down
 ```
 
 Получить пароль от пользователя admin
@@ -106,11 +100,19 @@ There are some problems with the provider_installation configuration:
 ╵
 ```
 
-В зависимости от типа Linux, действия будут отличаться.
+В зависимости от типа Linux, действия будут отличаться. Для автоматизации добавления сертификата подготовлен скрипт - **trust-caddy-ca.sh**.
+
+Для работы не забыть выдать права
+
+```bash
+chmod u+x trust-caddy-ca.sh
+```
+
+Логика добавления сертификата такая:
 
 Копируем самоподписной сертификат в системную папку. В зависимости от типа Linux, действия будут отличаться.
 
-Для Deb (Debian / Ubuntu / Astra Linux). Копируем файл в каталог /usr/local/share/ca-certificates:
+Для Deb (Debian / Ubuntu / Astra Linux). Копируем файл в каталог `/usr/local/share/ca-certificates`:
 
 ```bash
 sudo cp ./infra/caddy-data/caddy/pki/authorities/local/root.crt /usr/local/share/ca-certificates/
@@ -140,6 +142,12 @@ Go по умолчанию ищет SSL-сертификаты (корневые
 
 ### Создание репозитория в Nexus
 
+Перед началом работы необходимо получить пароль от админа
+
+```bash
+docker exec -it nexus cat /nexus-data/admin.password
+```
+
 Предварительно подготовим GPG ключ для подписи нашего репозитория.
 
 Создание нового ключа.
@@ -164,30 +172,49 @@ gpg --export-secret-key --armor YOUR_KEY_ID
 Перед тем как добавить провайдер его нужно положить в архив. Имя архива должно соответствовать стандарту `{name}_{version}_{os}_{arch}.zip`.
 
 ```bash
-zip terraform-provider-local_2.7.0_linux_amd64.zip terraform-provider-local LICENSE
+zip terraform-provider-local_2.8.0_linux_amd64.zip terraform-provider-local LICENSE
 ```
 
-Загрузка архива с помощью curl !TODO
+Загрузка архива с помощью **curl**
 
 ```bash
 curl -X PUT \
-  'https://localhost/repository/terraform-hosted/v1/providers/hashicorp/local/2.7.0/download/linux/amd64' \
+  'https://localhost/repository/rebrain/v1/providers/hashicorp/local/2.8.0/download/linux/amd64' \
   -u 'user:pass' \
   -H 'Content-Type: application/zip' \
-  --data-binary '@terraform-provider-local_2.7.0_linux_amd64.zip'
+  -H 'Content-Disposition: attachment; filename="terraform-provider-local_2.8.0_linux_amd64.zip"' \
+  --data-binary '@terraform-provider-local_2.8.0_linux_amd64.zip'
 ```
 
-Настройка репозитория. Исправим ~/.terraformrc
+Теперь, когда приватный terraform registry подготовлен, необходимо авторизоваться в нём.
+
+К сожалению, Nexus не поддерживает `terraform login localhost`:
+
+```bash
+╷
+│ Error: Host does not support Terraform tokens API
+│ 
+│ The given hostname "localhost" does not support creating Terraform authorization tokens.
+╵
+```
+
+Перед тем как настроить наш новый провайдер для terraform, нужно активировать [Terraform Token Realm](https://help.sonatype.com/en/realms.html). Поэтому необходимо добавить авторизацию в настройки **~/.terraformrc** вместе с указанием URL для провайдеров:
 
 ```conf
 host "registry.terraform.io" {
   services = {
-    "providers.v1" = "https://localhost/repository/terraform-hosted/v1/providers/"
+    "providers.v1" = "https://localhost/repository/rebrain/v1/providers/<USER_TOKEN>/"
   }
 }
 ```
 
-Полезные ссылки
+<USER_TOKEN> - Представление в формате base64 либо токена пользователя Nexus, либо имени пользователя:пароля.
+
+```bash
+echo -n 'username:password' | base64
+```
+
+Полезные ссылки:
 
 - [terraform-repositories](https://help.sonatype.com/en/terraform-repositories.html#terraform-repositories)
 - [Подробнее про CLI конфигурацию](https://developer.hashicorp.com/terraform/cli/config/config-file)
