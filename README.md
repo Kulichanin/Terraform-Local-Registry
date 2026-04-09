@@ -37,13 +37,14 @@ install -D terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io
 
 ```rc
 provider_installation {
-  # Terraform будет сначала искать провайдер в локальной папке.
+  # Terraform будет искать провайдер hashicorp/local только в локальной папке.
   filesystem_mirror {
     path    = "/home/mda/.terraform.d/plugins" 
     include = ["hashicorp/local"]
   }
 
-  # Прямой доступ к официальному реестру для всего остального (если не найдет нужное)
+  # Для всех остальных провайдеров ходить в интернет. 
+  # Для hashicorp/local поиск в оф репе запрещён.
   direct {
     exclude = ["hashicorp/local"]
   }
