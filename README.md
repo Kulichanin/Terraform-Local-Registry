@@ -4,6 +4,14 @@
 
 ### Предварительная сборка и размещение провайдера
 
+Создание структуры папок (Plugins Directory)
+
+```bash
+mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/
+```
+
+Terraform очень внимательно следит за каталогами. Он ищет провайдеров в строго определенных путях. Нам нужно имитировать структуру официального реестра. Для работы через `filesystem_mirror` структура внутри path должна выглядеть так: **{path}/{hostname}/{namespace}/{type}/{version}/{os}_{arch}/...**. В нашем случае структура: **<ПУТЬ>/registry.terraform.io/hashicorp/local/<ВЕРСИЯ>/<ОС_АРХИТЕКТУРА>/**
+
 Скачиваем провайдер.
 
 ```bash
@@ -11,19 +19,11 @@ wget https://github.com/hashicorp/terraform-provider-local/archive/refs/tags/v2.
 unzip v2.8.0.zip && cd terraform-provider-local-2.8.0
 ```
 
-Создание структуры папок (Plugins Directory)
-
-```bash
-mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/
-```
-
-Собираем их исходников провайдер.
+Собираем из исходников провайдер.
 
 ```bash
 GOOS=linux GOARCH=amd64 go build -v
 ```
-
-Terraform очень внимательно следит за каталогами. Он ищет провайдеров в строго определенных путях. Нам нужно имитировать структуру официального реестра. Для работы через `filesystem_mirror` структура внутри path должна выглядеть так: **{path}/{hostname}/{namespace}/{type}/{version}/{os}_{arch}/...**. В нашем случае структура: **<ПУТЬ>/registry.terraform.io/hashicorp/local/<ВЕРСИЯ>/<ОС_АРХИТЕКТУРА>/**
 
 Теперь переместим туда собранный файл с помощью `install`(install -D копирует файл и создаёт необходимые каталоги).
 
@@ -209,7 +209,7 @@ host "registry.terraform.io" {
 }
 ```
 
-<USER_TOKEN> - Представление в формате base64 либо токена пользователя Nexus, либо имени пользователя:пароля.
+<USER_TOKEN> - Представление в формате `base64` либо токена пользователя Nexus, либо имени пользователя:пароля.
 
 ```bash
 echo -n 'username:password' | base64
@@ -220,3 +220,5 @@ echo -n 'username:password' | base64
 - [terraform-repositories](https://help.sonatype.com/en/terraform-repositories.html#terraform-repositories)
 - [Подробнее про CLI конфигурацию](https://developer.hashicorp.com/terraform/cli/config/config-file)
 - [Provider Network Mirror Protocol Reference](https://developer.hashicorp.com/terraform/internals/provider-network-mirror-protocol)
+
+[Ссылка на презентацию](https://disk.yandex.ru/i/2Y-63t2wikIrDQ)
