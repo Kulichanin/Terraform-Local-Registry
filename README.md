@@ -1,5 +1,7 @@
 # Terraform local registry
 
+Для экспериментов воспользуемся провайдером [terraform-provider-local](https://github.com/hashicorp/terraform-provider-local/).
+
 ## Локальное размещение провайдера
 
 ### Предварительная сборка и размещение провайдера
@@ -25,10 +27,10 @@ unzip v2.8.0.zip && cd terraform-provider-local-2.8.0
 GOOS=linux GOARCH=amd64 go build -v
 ```
 
-Теперь переместим туда собранный файл с помощью `install`(install -D копирует файл и создаёт необходимые каталоги).
+Теперь переместим туда собранный файл с помощью `cp`.
 
 ```bash
-install -D terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/terraform-provider-local
+cp terraform-provider-local ~/.terraform.d/plugins/registry.terraform.io/hashicorp/local/2.8.0/linux_amd64/terraform-provider-local
 ```
 
 ### Конфигурация terraform
@@ -66,8 +68,6 @@ Nexus написан на Java. [Требования](https://help.sonatype.com
 -Xmx1500m: Устанавливает максимальный предел ОЗУ, который JVM может занять у операционной системы.
 -XX:MaxDirectMemorySize=1500m: Максимальный размер использования ОЗУ.
 ```
-
-На данный момент версия образа `sonatype/nexus3:3.90.0` нестабильна и падает с ошибкой.
 
 ## Запуск окружения для стенда
 
@@ -109,7 +109,13 @@ There are some problems with the provider_installation configuration:
 chmod u+x trust-caddy-ca.sh
 ```
 
-Логика добавления сертификата такая:
+Запускаем от root
+
+```bash
+sudo ./trust-caddy-ca.sh
+```
+
+### Логика работы trust-caddy-ca.sh:
 
 Копируем самоподписной сертификат в системную папку. В зависимости от типа Linux, действия будут отличаться.
 

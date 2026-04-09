@@ -8,6 +8,6 @@ terraform {
 }
 
 resource "local_file" "rebrain" {
-  filename = "${path.module}/hello_colleagues.txt"
+  filename = "${path.module}/hello_web.txt"
   content  = "Привет! Этот файл создал Terraform с помощью провайдера 'local'."
 }
